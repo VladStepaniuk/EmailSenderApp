@@ -1,6 +1,7 @@
 ﻿using Quartz;
 using System.Net.Mail;
 using System.Net;
+using EmailSenderApp.Services;
 
 namespace EmailSenderApp
 {
@@ -18,7 +19,7 @@ namespace EmailSenderApp
 
             _emailSenderService.SendEmail();
             return Task.CompletedTask;
-            
+        
         }
     }
 }

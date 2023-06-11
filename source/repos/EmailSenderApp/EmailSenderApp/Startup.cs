@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using EmailSenderApp.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,24 +15,50 @@ namespace EmailSenderApp
 {
     public class Startup
     {
+        private static IScheduler _scheduler;
+
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;  
+        }
+
+        public IConfiguration Configuration { get; }
+
         public void ConfigureServices(IServiceCollection services)
         {
-            // Регистрация сервисов Quartz
-            services.AddQuartz(q =>
-            {
-                q.UseMicrosoftDependencyInjectionScopedJobFactory();
+            services.AddControllers();
 
+            services.AddTransient<EmailSenderService>();
+
+            services.AddCors(o => o.AddPolicy("AllowAnyOrigin",
+                      builder =>
+                      {
+                          builder.AllowAnyOrigin()
+                                 .AllowAnyMethod()
+                                 .AllowAnyHeader();
+                      }));
+
+            // registration Quartz.NET
+            services.AddSingleton<IJobFactory, JobFactory>();
+            services.AddSingleton(provider =>
+            {
+                var schedulerFactory = new StdSchedulerFactory();
+                var scheduler = schedulerFactory.GetScheduler().Result;
+                scheduler.JobFactory = provider.GetService<IJobFactory>();
+                scheduler.Start().Wait();
+                return scheduler;
             });
 
-            services.AddQuartzHostedService();
-
-            
-            services.AddSingleton<EmailSenderService>();
+            services.AddTransient<EmailJob>();
+            services.AddSingleton<ISchedulerAccessor>(provider =>
+            {
+                return new SchedulerAccessor(provider.GetService<IScheduler>());
+            });
 
         }
 
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISchedulerAccessor schedulerAccessor)
         {
             if (env.IsDevelopment())
             {
@@ -44,6 +71,13 @@ namespace EmailSenderApp
             {
                 endpoints.MapControllers();
             });
+
+            app.UseCors("AllowAnyOrigin");
+
+            _scheduler = schedulerAccessor.Scheduler;
+
+            QuartzService.StartSchedule(_scheduler);
+
         }
     }
 }

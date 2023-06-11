@@ -2,38 +2,61 @@
 using Microsoft.AspNetCore.Mvc;
 using Quartz.Impl.Triggers;
 using Quartz;
+using EmailSenderApp.DTO;
+using EmailSenderApp.Services;
 
 namespace EmailSenderApp.Controllers
 {
-    [Route("api/email")]
+    [Route("api/emailsettings")]
     [ApiController]
     public class EmailController : ControllerBase
     {
         private readonly IScheduler _scheduler;
+        private readonly QuartzService _quartzService;
 
         public EmailController(IScheduler scheduler)
         {
             _scheduler = scheduler;
         }
 
-        [HttpPost("interval")]
-        public async Task<IActionResult> SetEmailInterval([FromBody] int interval)
+        [HttpGet]
+        [Route("general")]
+        public IActionResult GetEmailSettings()
         {
-            var triggerKey = new TriggerKey("EmailTrigger");
-            var trigger = await _scheduler.GetTrigger(triggerKey) as ISimpleTrigger;
+            var model = EmailSenderService.GetEmailSettings();
+            return Ok(model);
+        }
 
-            if (trigger == null)
-                return NotFound();
+        [HttpPost]
+        [Route("setgeneral")]
+        public IActionResult SetEmailSettings([FromBody] EmailJobOptionsModel model)
+        {
+            EmailSenderService.SetEmailSettings(model);
+            UpdateEmailJobTrigger();
+            return Ok(model);
+        }
 
-            var updatedTrigger = (ISimpleTrigger)trigger.GetTriggerBuilder()
-                .WithSimpleSchedule(x => x
-                    .WithIntervalInSeconds(interval)
-                    .RepeatForever())
-                .Build();
-
-            await _scheduler.RescheduleJob(triggerKey, updatedTrigger);
-
-            return Ok();
+        private void UpdateEmailJobTrigger()
+        {
+            
+            if (EmailSenderService.GetIsScheduled())
+            {
+                if (!_scheduler.IsShutdown)
+                {
+                    _scheduler.RescheduleJob(new TriggerKey("emailTrigger"),
+                        QuartzService.BuildEmailTrigger(EmailSenderService.GetEmailInterval(), EmailSenderService.GetPeriodicity())).Wait();
+                }
+                else
+                {
+                    QuartzService.RestartSchedule(_scheduler);
+                    _scheduler.RescheduleJob(new TriggerKey("emailTrigger"),
+                        QuartzService.BuildEmailTrigger(EmailSenderService.GetEmailInterval(), EmailSenderService.GetPeriodicity())).Wait();
+                }
+            }
+            else
+            {
+                //_scheduler.Shutdown().GetAwaiter().GetResult();
+            }
         }
     }
 }

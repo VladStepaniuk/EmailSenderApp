@@ -1,22 +1,94 @@
 <h1>Schedule a New Job</h1>
 
-<div class="left-block">
-    <div class="hours-block">
-    <p>Every:</p>
-    <input type="text"/>
+<form (submit)="onFormSubmit()">
+    <div class="row">
+            <div class="col-md-6 mt-3">
+                <div class="form-group mb-3">
+                    <label for="everyHourInput" class="form-label">Every:</label>
+                    <input class="form-control" name="intervalValue" [(ngModel)]="emailSettings.intervalValue" required/>
+                </div>
+                <div class="form-group">
+                    <label for="hourFromInput" class="form-label">From Hour:</label>
+                    <input class="form-control" name="startTime" [(ngModel)]="emailSettings.startTime" required/>
+                </div>
+            
+            </div>
+            <div class="col-md-6 mt-4">
+                <div class="form-group mb-3">
+                    <label for="timeTypeInput">Time value:</label>
+                    <select class="form-select" (change)="onChange($event)">
+                        <option *ngFor="let option of options" [value]="option" [selected]="option === emailSettings.periodicity">{{ option }}</option>
+                      </select>
+                </div>
+                <div class="form-group">
+                        <label for="hourToInput" class="form-label">To Hour:</label>
+                        <input class="form-control" name="endTime" [(ngModel)]="emailSettings.endTime" required>
+                </div>
+            </div>
+            
     </div>
-    <div class="from-hours-block">
-        <p>From Hour:</p>
-        <input type="text"/>
+
+    <div class="row mt-5">
+        <div class="col-md-3">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="0" id="flexCheckDefault" #checkbox (change)="onCheckboxDaysChange(+checkbox.value)" [checked]="emailSettings.daysOfWeek.includes(0)">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Every Sunday
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="2" id="flexCheckDefault" #checkbox (change)="onCheckboxDaysChange(+checkbox.value)" [checked]="emailSettings.daysOfWeek.includes(2)">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Every Tuesday
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="4" id="flexCheckDefault" #checkbox (change)="onCheckboxDaysChange(+checkbox.value)" [checked]="emailSettings.daysOfWeek.includes(4)">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Every Thursday
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="6" id="flexCheckDefault" #checkbox (change)="onCheckboxDaysChange(+checkbox.value)" [checked]="emailSettings.daysOfWeek.includes(6)">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Every Saturday
+                </label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="1" id="flexCheckDefault" #checkbox (change)="onCheckboxDaysChange(+checkbox.value)" [checked]="emailSettings.daysOfWeek.includes(1)">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Every Monday
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="3" id="flexCheckDefault" #checkbox (change)="onCheckboxDaysChange(+checkbox.value)" [checked]="emailSettings.daysOfWeek.includes(3)">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Every Wednesday
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="5" id="flexCheckDefault" #checkbox (change)="onCheckboxDaysChange(+checkbox.value)" [checked]="emailSettings.daysOfWeek.includes(5)">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Every Friday
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" (change)="onIsScheduledChange()" [checked]="emailSettings.isScheduled">
+                <label class="form-check-label fs-5" for="flexCheckDefault">
+                Is Scheduled 
+                </label>
+            </div>
+        </div>
     </div>
-</div>
-<div class="right-block">
-    <div class="h-block">
-        <p>Hour:</p>
-        <input type="text"/>
+    <div class="row mt-3">
+        <div class="col-md-1">
+        <button type="button" class="btn btn-lg btn-outline-danger mr-2" (click)="cancelChanges()">Cancel</button>
+        </div>
+        <div class="col-md-1">
+        <button type="submit" class="btn btn-lg btn-outline-success">Save</button>
+        </div>
     </div>
-    <div class="to-hour-block">
-            <p>To Hour:</p>
-            <input type="text"/>
-    </div>
-</div>
+
+</form>

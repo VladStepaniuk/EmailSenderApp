@@ -1,1 +1,27 @@
 /* You can add global styles to this file, and also import other style files */
+@import '../node_modules/bootstrap/scss/bootstrap.scss';
+
+.toast-container {
+    top: 20px;
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    width: max-content;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    
+}
+
+.toast-success {
+  background-color: #dff0d8;
+  color: #3c763d;
+  border-color: #6ff700;
+}
+
+.toast-success .toast-message {
+  font-weight: bold;
+}
+
+.toast-success .toast-title {
+  color: #3c763d;
+}
